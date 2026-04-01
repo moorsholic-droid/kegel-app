@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تمارين كيغل</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- التنقل -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" onclick="showPage('home')">🏠</button>
+      <button class="nav-btn" onclick="showPage('program')">📅</button>
+      <button class="nav-btn" onclick="showPage('nofap')">🏆</button>
+      <button class="nav-btn" onclick="showPage('health')">🌿</button>
+      <button class="nav-btn" onclick="showPage('history')">📊</button>
+    </nav>
+
+    <!-- الصفحة الرئيسية -->
+    <div id="page-home">
+      <header>
+        <h1>💪 تمارين كيغل</h1>
+        <p id="streakLabel">ابدأ جلستك اليومية</p>
+      </header>
+
+      <div class="exercise-picker">
+        <button class="ex-btn active" onclick="selectExercise('classic', this)">
+          <span class="ex-icon">🔵</span>
+          <span class="ex-name">كلاسيكي</span>
+        </button>
+        <button class="ex-btn" onclick="selectExercise('fast', this)">
+          <span class="ex-icon">⚡</span>
+          <span class="ex-name">سريع</span>
+        </button>
+        <button class="ex-btn" onclick="selectExercise('long', this)">
+          <span class="ex-icon">🌊</span>
+          <span class="ex-name">طويل</span>
+        </button>
+      </div>
+
+      <div class="exercise-desc" id="exerciseDesc">
+        شد العضلات لثوانٍ ثم استرخِ — التمرين الأساسي
+      </div>
+
+      <div class="animation-container">
+        <div class="muscle-anim">
+          <div class="muscle-circle" id="muscleCircle"></div>
+          <div class="anim-label" id="animLabel">جاهز</div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="val" id="totalReps">0</div>
+          <div class="lbl">تكرار</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="currentSet">1</div>
+          <div class="lbl">المجموعة</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="totalSets">3</div>
+          <div class="lbl">المجموعات</div>
+        </div>
+      </div>
+
+      <div class="circle-container">
+        <div class="ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="ring-track" cx="50" cy="50" r="43"/>
+            <circle class="ring-progress" id="ringCircle" cx="50" cy="50" r="43"/>
+          </svg>
+          <div class="ring-label">
+            <div class="phase" id="phaseLabel">جاهز</div>
+            <div class="seconds" id="timerDisplay">0</div>
+          </div>
+        </div>
+        <div class="main-phase" id="mainPhaseLabel">اضبط الإعدادات وابدأ</div>
+      </div>
+
+      <div class="controls" id="controlsDiv">
+        <div class="ctrl-row">
+          <label>شد (ثانية)</label>
+          <input type="range" id="holdTime" min="2" max="15" step="1" value="5"
+            oninput="document.getElementById('holdVal').textContent=this.value">
+          <span class="val-display" id="holdVal">5</span>
+        </div>
+        <div class="ctrl-row">
+          <label>راحة (ثانية)</label>
+          <input type="range" id="restTime" min="2" max="15" step="1" value="5"
+            oninput="document.getElementById('restVal').textContent=this.value">
+          <span class="val-display" id="restVal">5</span>
+        </div>
+        <div class="ctrl-row">
+          <label>تكرار / مجموعة</label>
+          <input type="range" id="repsPerSet" min="3" max="20" step="1" value="10"
+            oninput="document.getElementById('repsVal').textContent=this.value">
+          <span class="val-display" id="repsVal">10</span>
+        </div>
+        <div class="ctrl-row">
+          <label>المجموعات</label>
+          <input type="range" id="numSets" min="1" max="6" step="1" value="3"
+            oninput="syncSets(this.value)">
+          <span class="val-display" id="setsVal">3</span>
+        </div>
+      </div>
+
+      <button class="btn-start btn-green" id="mainBtn" onclick="toggleStart()">▶ ابدأ التمرين</button>
+      <button class="btn-reset" id="resetBtn" onclick="resetAll()" style="display:none">↺ إعادة تعيين</button>
+
+      <div class="done-banner" id="doneBanner">
+        <h2>🎉 أحسنت!</h2>
+        <p id="doneMsg">أكملت جلستك بنجاح!</p>
+      </div>
+    </div>
+
+    <!-- صفحة البرنامج الأسبوعي -->
+    <div id="page-program" style="display:none">
+      <header>
+        <h1>📅 البرنامج الأسبوعي</h1>
+        <p>تمارين تصاعدية لمدة 7 أيام</p>
+      </header>
+      <div class="week-grid" id="weekGrid"></div>
+      <div class="program-card" id="programCard" style="display:none">
+        <h3 id="programDayTitle"></h3>
+        <p id="programDayDesc"></p>
+        <div class="program-details" id="programDetails"></div>
+        <button class="btn-start btn-green" style="margin-top:1rem"
+          onclick="startProgramDay()">▶ ابدأ تمرين اليوم</button>
+      </div>
+      <div class="empty-msg" id="programEmpty">اضغط على يوم لعرض تفاصيله</div>
+    </div>
+
+    <!-- صفحة No Fap -->
+    <div id="page-nofap" style="display:none">
+      <header>
+        <h1>🏆 No Fap</h1>
+        <p>التحكم يبني الإرادة</p>
+      </header>
+
+      <div class="nofap-counter">
+        <div class="nofap-days" id="nofapDays">0</div>
+        <div class="nofap-label">يوم</div>
+      </div>
+
+      <div class="nofap-badge" id="nofapBadge">
+        <span id="nofapBadgeIcon">🌱</span>
+        <span id="nofapBadgeName">البداية</span>
+      </div>
+
+      <div class="nofap-msg" id="nofapMsg">كل رحلة تبدأ بخطوة واحدة. أنت تستطيع!</div>
+
+      <div class="stats-row" style="margin-top:1.5rem">
+        <div class="stat-card">
+          <div class="val" id="nofapBest">0</div>
+          <div class="lbl">أفضل سلسلة</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="nofapTotal">0</div>
+          <div class="lbl">محاولات</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="nofapPercent">0%</div>
+          <div class="lbl">نسبة النجاح</div>
+        </div>
+      </div>
+
+      <div class="nofap-milestones" id="nofapMilestones"></div>
+
+      <button class="btn-start btn-green" onclick="nofapCheckin()" style="margin-top:1rem">
+        ✅ أنا بخير اليوم
+      </button>
+      <button class="btn-reset" onclick="nofapReset()" style="margin-top:8px">
+        🔴 إعادة التعيين
+      </button>
+    </div>
+
+    <!-- صفحة الصحة والتغذية -->
+    <div id="page-health" style="display:none">
+      <header>
+        <h1>🌿 الصحة والتغذية</h1>
+      </header>
+
+      <!-- نصيحة اليوم -->
+      <div class="tip-of-day" id="tipOfDay">
+        <div class="tip-tag">💡 نصيحة اليوم</div>
+        <div class="tip-text" id="tipText"></div>
+      </div>
+
+      <!-- تصنيفات النصائح -->
+      <div class="health-tabs">
+        <button class="htab active" onclick="showHealthTab('all', this)">الكل</button>
+        <button class="htab" onclick="showHealthTab('health', this)">صحية</button>
+        <button class="htab" onclick="showHealthTab('mental', this)">نفسية</button>
+        <button class="htab" onclick="showHealthTab('social', this)">اجتماعية</button>
+        <button class="htab" onclick="showHealthTab('sport', this)">رياضية</button>
+        <button class="htab" onclick="showHealthTab('culture', this)">ثقافية</button>
+      </div>
+
+      <div class="tips-list" id="tipsList"></div>
+
+      <!-- التغذية -->
+      <div class="section-title">🥗 التغذية</div>
+
+      <div class="food-tabs">
+        <button class="ftab active" onclick="showFoodTab('good', this)">✅ مفيدة</button>
+        <button class="ftab" onclick="showFoodTab('bad', this)">❌ ضارة</button>
+      </div>
+
+      <div class="food-cats" id="foodCats"></div>
+    </div>
+
+    <!-- صفحة السجل -->
+    <div id="page-history" style="display:none">
+      <header>
+        <h1>📊 سجل الجلسات</h1>
+      </header>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="val" id="histTotalSessions">0</div>
+          <div class="lbl">جلسة</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="histStreak">0</div>
+          <div class="lbl">🔥 يوم متتالي</div>
+        </div>
+        <div class="stat-card">
+          <div class="val" id="histTotalReps">0</div>
+          <div class="lbl">تكرار كلي</div>
+        </div>
+      </div>
+      <div class="history-list" id="historyList"></div>
+      <button class="btn-reset" onclick="clearHistory()" style="margin-top:1rem">
+        🗑 مسح كل السجل
+      </button>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
